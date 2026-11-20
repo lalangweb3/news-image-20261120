@@ -15,7 +15,14 @@ OUT = Path(os.environ.get("MAKEFUN_OUTPUT_DIR", "/output"))
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(HERE / "entry.png", OUT / "entry.png")
+    src = HERE / "entry.png"
+    dst = OUT / "entry.png"
+    shutil.copyfile(src, dst)
+    # Guard: the gate only takes a whole PNG (or JPEG) of at most 1 MiB.
+    data = dst.read_bytes()
+    assert data[:8] == b"\x89PNG\r\n\x1a\n", "entry.png is not a PNG"
+    assert len(data) <= 1048576, "entry.png is over 1 MiB"
+    print(f"wrote {dst} ({len(data)} bytes)")
 
 
 if __name__ == "__main__":
